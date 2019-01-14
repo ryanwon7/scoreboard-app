@@ -1,0 +1,16 @@
+# This is a sample announcements.txt file
+# Modify this file for your needs and put it
+# in the slides folder.
+
+TITL=Basketball League Reminder
+MSG1=Please arrive 30 minutes
+MSG2=before game time to check-in,
+MSG3=stretch and warm-up.
+MSG4=Be ready to play on time!
+TIME=15
+
+TITL=Mount Olive Basketball League
+MSG2=Thursday evenings
+MSG3=Game Times 6:30, 7:30, 8:30, 9:30
+TIME=10
+
