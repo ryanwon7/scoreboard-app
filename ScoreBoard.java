@@ -313,7 +313,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         possesionButton.addActionListener(this);
 	    possesionButton.setFont(buttonFont);
 
-        sethomeButton = new Button("Home");
+        sethomeButton = new Button("Hoame");
         sethomeButton.addActionListener(this);
 	    sethomeButton.setFont(buttonFont);
 
