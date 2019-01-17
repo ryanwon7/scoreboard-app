@@ -63,19 +63,18 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     Frame windowFrame;
     Graphics scoreboardGraphics;
     Button startButton, stopButton, modeButton,
-           homeupButton, homednButton, homesetButton,
-           guestupButton, guestdnButton, guestsetButton,
+           homeuptwoButton, homedntwoButton, homesetButton,
+           guestuptwoButton, guestdntwoButton, guestsetButton,
            sethomeButton, setguestButton, settimeButton,
            possesionButton, homeBonusButton, guestBonusButton,
            periodUpButton, periodOneButton, periodDnButton,
            homeFoulsButton, hornButton,
            guestFoulsButton, beepButton,
            clearAllFoulsButton, clearTeamFoulsButton,
-	   homeuptwoButton, guestuptwoButton,
+       homeupthreeButton, guestupthreeButton,
+       homednthreeButton, guestdnthreeButton,
 	   starttoButton, cleartoButton,
-           resetButton, undoLastButton, resetSlidesButton,
-           suspendSlidesButton, clearSlidesButton, resumeSlidesButton;
-    boolean possesionArrow;
+           resetButton, undoLastButton;
     boolean homeInBonus;
     boolean guestInBonus;
     int scoreHome, scoreGuest;
@@ -97,7 +96,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     int lastIndex = -1;
     String prevPlayer;
     int prevFouls;
-    int prevTeam;	// Home = 0, Guest = 1
+    int prevTeam;	
+    int scoreboardMode;// Home = 0, Guest = 1
 
     Color bgColor;
     Color timeColor;
@@ -108,16 +108,10 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     int buttonFontSize;
     Color textColor;
     Color fillColor;
-    Color bonusLightColor;
-    Color possesionArrowColor;
     String preferredFont;
-    String slideShowDir;
-    int slideDelay;    
-    int numSlides;    
-    SlideShow scoreboardSlides;
     int framePositionX;
     int framePositionY;
-    int scoreboardMode;	// 0 = Basketball, 1 = Volleyball
+    Color guestColor;
     
     public void init() {
 
@@ -131,7 +125,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 
         getParamTags();
         setupControlPanel();
-        scoreboardImage = createImage(1920,660);
+        scoreboardImage = createImage(1920,1080);
         scoreboardGraphics = scoreboardImage.getGraphics();
         scoreboardImageCanvas = new ImageCanvas(scoreboardImage,this,1920,660);
         windowFrame = new Frame("Scoreboard");
@@ -139,11 +133,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         windowFrame.setBackground(bgColor);
         windowFrame.setLayout(new BorderLayout());
         windowFrame.add("North", scoreboardImageCanvas);
-        if (slideShowDir != null) {
-            scoreboardSlides = new SlideShow(this,getCodeBase(),slideShowDir,numSlides,slideDelay,1920,400);
-            windowFrame.add("South", scoreboardSlides);
-            scoreboardSlides.start();
-        }
         windowFrame.pack();
         scoreboardTimer = new Timer(0);
         scoreboardTimer.start();
@@ -195,36 +184,11 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         } else {
             fillColor = Color.lightGray;
         }
-        paramString = getParameter("bonusLightColor");
-        if (paramString != null) {
-            bonusLightColor = new Color(hexValue(paramString));
-        } else {
-            bonusLightColor = Color.red;
-        }
-        paramString = getParameter("possesionArrowColor");
-        if (paramString != null) {
-            possesionArrowColor = new Color(hexValue(paramString));
-        } else {
-            possesionArrowColor = Color.red;
-        }
         paramString = getParameter("preferredFont");
         if (paramString != null) {
             preferredFont = paramString;
         } else {
             preferredFont = "Helvetica";
-        }
-        paramString = getParameter("slideDelay");
-        if (paramString != null) {
-            slideDelay = intValue(paramString);
-        } else {
-            slideDelay = 15;
-        }
-        slideShowDir = getParameter("slideShowDir");
-        paramString = getParameter("numSlides");
-        if (paramString != null) {
-            numSlides = intValue(paramString);
-        } else {
-            numSlides = 3;
         }
         paramString = getParameter("framePositionX");
         if (paramString != null) {
@@ -273,31 +237,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         timeoutText = new TextField(10);
         scoreText = new TextField(10);
 
-        homeFoulsButton = new Button("Home Foul");
-        homeFoulsButton.addActionListener(this);
-	    homeFoulsButton.setFont(buttonFont);
-        hornButton = new Button("Horn");
-        hornButton.addActionListener(this);
-	    hornButton.setFont(buttonFont);
-        guestFoulsButton = new Button("Guest Foul");
-        guestFoulsButton.addActionListener(this);
-	    guestFoulsButton.setFont(buttonFont);
-        beepButton = new Button("Beep");
-        beepButton.addActionListener(this);
-	    beepButton.setFont(buttonFont);
-        clearAllFoulsButton = new Button("Clear All Fouls");
-        clearAllFoulsButton.addActionListener(this);
-	    clearAllFoulsButton.setFont(buttonFont);
-        clearTeamFoulsButton = new Button("Clear Team Fouls");
-        clearTeamFoulsButton.addActionListener(this);
-	    clearTeamFoulsButton.setFont(buttonFont);
-
-        homeBonusButton = new Button("Home Bonus");
-        homeBonusButton.addActionListener(this);
-	    homeBonusButton.setFont(buttonFont);
-        guestBonusButton = new Button("Guest Bonus");
-        guestBonusButton.addActionListener(this);
-	    guestBonusButton.setFont(buttonFont);
 
         periodUpButton = new Button("Period+");
         periodUpButton.addActionListener(this);
@@ -307,17 +246,13 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 	    periodOneButton.setFont(buttonFont);
         periodDnButton = new Button("Period-");
         periodDnButton.addActionListener(this);
-	    periodDnButton.setFont(buttonFont);
-
-        possesionButton = new Button("Poss Arrow");
-        possesionButton.addActionListener(this);
-	    possesionButton.setFont(buttonFont);
-
-        sethomeButton = new Button("Hoame");
+        periodDnButton.setFont(buttonFont);
+        
+        sethomeButton = new Button("Red");
         sethomeButton.addActionListener(this);
 	    sethomeButton.setFont(buttonFont);
 
-        setguestButton = new Button("Guest");
+        setguestButton = new Button("Yellow");
         setguestButton.addActionListener(this);
 	    setguestButton.setFont(buttonFont);
 
@@ -325,31 +260,25 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         settimeButton.addActionListener(this);
 	    settimeButton.setFont(buttonFont);
 
+        homeupthreeButton = new Button("Home Pt+3");
+        homeupthreeButton.addActionListener(this);
+	    homeupthreeButton.setFont(buttonFont);
+
         homeuptwoButton = new Button("Home Pt+2");
         homeuptwoButton.addActionListener(this);
 	    homeuptwoButton.setFont(buttonFont);
 
-        homeupButton = new Button("Home Pt+");
-        homeupButton.addActionListener(this);
-	    homeupButton.setFont(buttonFont);
+        homednthreeButton = new Button("Home Pt-3");
+        homednthreeButton.addActionListener(this);
+        homednthreeButton.setFont(buttonFont);
+        
+        homedntwoButton = new Button("Home Pt-2");
+        homedntwoButton.addActionListener(this);
+	    homedntwoButton.setFont(buttonFont);
 
-        homednButton = new Button("Home Pt-");
-        homednButton.addActionListener(this);
-	    homednButton.setFont(buttonFont);
-
-        homesetButton = new Button("Home Pt=");
+        homesetButton = new Button("Home Pt Reset");
         homesetButton.addActionListener(this);
 	    homesetButton.setFont(buttonFont);
-
-        starttoButton = new Button("Start TO");
-        starttoButton.addActionListener(this);
-        starttoButton.setEnabled(true);
-	    starttoButton.setFont(buttonFont);
-
-        cleartoButton = new Button("Clear TO");
-        cleartoButton.addActionListener(this);
-        cleartoButton.setEnabled(false);
-	    cleartoButton.setFont(buttonFont);
 
         startButton = new Button("Start");
         startButton.addActionListener(this);
@@ -361,109 +290,71 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         stopButton.setEnabled(false);
 	    stopButton.setFont(buttonFont);
 
-        modeButton = new Button("Volleyball");
-        modeButton.addActionListener(this);
-	    modeButton.setFont(buttonFont);
+        guestupthreeButton = new Button("Guest Pt+3");
+        guestupthreeButton.addActionListener(this);
+	    guestupthreeButton.setFont(buttonFont);
 
         guestuptwoButton = new Button("Guest Pt+2");
         guestuptwoButton.addActionListener(this);
 	    guestuptwoButton.setFont(buttonFont);
 
-        guestupButton = new Button("Guest Pt+");
-        guestupButton.addActionListener(this);
-	    guestupButton.setFont(buttonFont);
+        guestdntwoButton = new Button("Guest Pt-2");
+        guestdntwoButton.addActionListener(this);
+        guestdntwoButton.setFont(buttonFont);
+        
+        guestdnthreeButton = new Button("Guest Pt-3");
+        guestdnthreeButton.addActionListener(this);
+	    guestdnthreeButton.setFont(buttonFont);
 
-        guestdnButton = new Button("Guest Pt-");
-        guestdnButton.addActionListener(this);
-	    guestdnButton.setFont(buttonFont);
-
-        guestsetButton = new Button("Guest Pt=");
+        guestsetButton = new Button("Guest Pt Reset");
         guestsetButton.addActionListener(this);
 	    guestsetButton.setFont(buttonFont);
-
-        suspendSlidesButton = new Button("Pause Slides");
-        suspendSlidesButton.addActionListener(this);
-	    suspendSlidesButton.setFont(buttonFont);
-        clearSlidesButton = new Button("Clear Slide");
-        clearSlidesButton.addActionListener(this);
-	    clearSlidesButton.setFont(buttonFont);
-        resumeSlidesButton = new Button("Start Slides");
-        resumeSlidesButton.addActionListener(this);
-	    resumeSlidesButton.setFont(buttonFont);
-        resetSlidesButton = new Button("Reset Slides");
-        resetSlidesButton.addActionListener(this);
-	    resetSlidesButton.setFont(buttonFont);
 
         resetButton = new Button("Reset");
         resetButton.addActionListener(this);
 	    resetButton.setFont(buttonFont);
 
-        undoLastButton = new Button("Undo Last Foul");
-        undoLastButton.addActionListener(this);
-	    undoLastButton.setFont(buttonFont);
+        setLayout(new GridLayout(11,2,3,3)); // 13 rows, 3 cols, 3 pixel gaps
 
-        setLayout(new GridLayout(13,3,3,3)); // 13 rows, 3 cols, 3 pixel gaps
+        
+        add(timerText);
+        add(settimeButton);
+        
+        add(startButton);
+        add(stopButton);
 
         add(homeText);
-        add(timerText);
         add(guestText);
 
         add(sethomeButton);
-        add(settimeButton);
         add(setguestButton);
 
+        add(homeupthreeButton);
+        add(guestupthreeButton);
+
         add(homeuptwoButton);
-        add(startButton);
         add(guestuptwoButton);
 
-        add(homeupButton);
-        add(stopButton);
-        add(guestupButton);
+        add(homedntwoButton);
+        add(guestdntwoButton);
 
-        add(homednButton);
-        add(possesionButton);
-        add(guestdnButton);
+        add(homednthreeButton);
+        add(guestdnthreeButton);
 
         add(homesetButton);
-        add(scoreText);
         add(guestsetButton);
 
-        add(homeBonusButton);
-        add(clearTeamFoulsButton);
-        add(guestBonusButton);
-
-        add(homeFoulsButton);
-        add(foulPlayerText);
-        add(guestFoulsButton);
-
         add(periodUpButton);
-        add(clearAllFoulsButton);
         add(periodDnButton);
 
-        add(starttoButton);
-        add(timeoutText);
-        add(cleartoButton);
+        add(resetButton);
 
-        add(hornButton);
-        add(modeButton);
-        add(beepButton);
-
-	add(resetButton);
-	add(undoLastButton);
-        
-        if (slideShowDir != null) {
-	    add(resetSlidesButton);
-
-            add(suspendSlidesButton);
-            add(clearSlidesButton);
-            add(resumeSlidesButton);
-        }
 
     }
 
     public void resetScoreboard() {
         scoreboardGraphics.setColor(fillColor);
-        scoreboardGraphics.fillRect(0,0,1920,660);
+        scoreboardGraphics.fillRect(0,0,1920,1080);
         scoreboardTimer.pause();
         scoreboardTimer.setTimer(0);
         timeoutTimer.pause();
@@ -471,32 +362,16 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         paintTimer();
         startButton.setEnabled(false);
         stopButton.setEnabled(false);
-        nameHome = "HOME";
+        nameHome = "RED";
         paintHomeName();
-        nameGuest = "GUEST";
+        nameGuest = "YELLOW";
         paintGuestName();
         scoreHome = 0;
         paintHomeScore();
         scoreGuest = 0;
         paintGuestScore();
-        possesionArrow = false;
-        //paintPossesionArrow();
         periodNumber = 1;
-        //paintPeriod();
-        homeInBonus = false;
-        guestInBonus = false;
-        //paintBonus();
-        setsHome = 0;
-        homePlayers[0] = null;
-        totalHomeFouls = 0;
-        lastHomePlayer = null;
-        setsGuest = 0;
-        guestPlayers[0] = null;
-        totalGuestFouls = 0;
-        lastGuestPlayer = null;
-        prevPlayer = null;
-        prevTeam = -1;
-        //paintFoulsSets();
+        paintPeriod();
         scoreboardImageCanvas.repaint();
     }
 
@@ -525,8 +400,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 
       if (scoreboardMode == 1) {
         scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(520,190,880,300,40,40);
-        scoreboardImageCanvas.repaint(520,190,880,300);
+        scoreboardGraphics.fillRoundRect(520,20,880,300,40,40);
+        scoreboardImageCanvas.repaint(520,20,880,300);
       } else {
         if (scoreboardTimer != null) dTime = scoreboardTimer.timerValue;
 
@@ -542,99 +417,45 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             sMin = dMin < 10 ? "0" + dMin : "" + dMin;
             sSec = dSec < 10 ? "0" + dSec : "" + dSec;
             sTim = sMin + ":" + sSec;
-            scoreboardGraphics.fillRoundRect(530,190,880,300,40,40);
+            scoreboardGraphics.fillRoundRect(530,20,880,300,40,40);
             scoreboardGraphics.setColor(timeColor);
-            scoreboardGraphics.drawString(sTim, 550, 450);
-            scoreboardImageCanvas.repaint(520,190,880,300);
+            scoreboardGraphics.drawString(sTim, 550, 280);
+            scoreboardImageCanvas.repaint(520,20,880,300);
           }
         }
         else {
           sSec = dSec < 10 ? "0" + dSec : "" + dSec;
           sMil = "" + dMil;
           sTim = ":" + sSec + "." + sMil;
-          scoreboardGraphics.fillRoundRect(520,190,880,300,40,40);
+          scoreboardGraphics.fillRoundRect(520,20,880,300,40,40);
           scoreboardGraphics.setColor(lastMinuteTimeColor);
-          scoreboardGraphics.drawString(sTim, 590, 450);
-          scoreboardImageCanvas.repaint(520,190,880,300);
+          scoreboardGraphics.drawString(sTim, 590, 280);
+          scoreboardImageCanvas.repaint(520,20,880,300);
         }
       }
     }
 
     public synchronized void paintPeriod() { 
         String periodString;
-	int lrPos = 737;
 
-	if (scoreboardMode == 1) {
-            periodString = "GAME " + periodNumber;
-	    lrPos = 780;
-	} else {
-            if (periodNumber <= maxPeriods) {
-                periodString = "PERIOD " + periodNumber;
-            } else {
-                periodString = "PERIOD OT";
-	        lrPos = 699;
-                if (periodNumber > (maxPeriods+1)) {
-		    lrPos = 672;
-                    periodString += (periodNumber - maxPeriods);
-                }
+        if (periodNumber <= maxPeriods) {
+            periodString = periodNumber + "";
+            scoreboardGraphics.setColor(bgColor);
+            scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 300));
+            scoreboardGraphics.fillRoundRect(835,600,250,300,40,40);
+            scoreboardGraphics.setColor(Color.WHITE);
+            scoreboardGraphics.drawString(periodString, 880, 850);
+            scoreboardImageCanvas.repaint(835,600,250,300);
+        } else {
+            periodString = "OT";
+            scoreboardGraphics.setColor(bgColor);
+            scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 175));
+            scoreboardGraphics.fillRoundRect(835,600,250,300,40,40);
+            scoreboardGraphics.setColor(Color.WHITE);
+            scoreboardGraphics.drawString(periodString, 835, 820);
+            scoreboardImageCanvas.repaint(835,600,250,300);
 	    }
-        }
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 40));
-
-        scoreboardGraphics.fillRoundRect(540,315,850,90,20,20);
-        scoreboardGraphics.setColor(textColor);
-        scoreboardGraphics.drawString(periodString, lrPos, 516);
-        scoreboardImageCanvas.repaint(540,315,850,90);
-    }
-
-    public synchronized void paintBonus() { 
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 90));
-
-        scoreboardGraphics.fillRoundRect(520,510,880,130,40,40);
-        if (timeoutTimer != null && timeoutTimer.timerValue > 0) {
-	    String sSec, sTim;
-	    int dMin, dSec, dTime = 0;
-
-            dTime = timeoutTimer.timerValue;
-
-	    dMin = dTime / 600;
-	    dSec = (dTime / 10) % 60;
-
-	    sSec = dSec < 10 ? "0" + dSec : "" + dSec;
-	    sTim = dMin + ":" + sSec;
-	    scoreboardGraphics.setColor(textColor);
-	    scoreboardGraphics.drawString("TIMEOUT", 600, 598);
-	    scoreboardGraphics.drawString(sTim, 1130, 598);
-	} else if (scoreboardMode == 0) {
-            if (timeoutTimer != null && timeoutTimer.timerValue > 0) {
-		String sSec, sTim;
-		int dMin, dSec, dTime = 0;
-
-        	dTime = timeoutTimer.timerValue;
-
-		dMin = dTime / 600;
-		dSec = (dTime / 10) % 60;
-
-		sSec = dSec < 10 ? "0" + dSec : "" + dSec;
-		sTim = dMin + ":" + sSec;
-		scoreboardGraphics.setColor(textColor);
-		scoreboardGraphics.drawString("TIMEOUT", 600, 598);
-		scoreboardGraphics.drawString(sTim, 1130, 598);
-	    ///} else {
-                //scoreboardGraphics.setColor(textColor);
-                //scoreboardGraphics.drawString("BONUS", 811, 598);
-                //scoreboardGraphics.setColor(bonusLightColor);
-                //if (homeInBonus == true) {
-                //    scoreboardGraphics.fillOval(564,549,60,60);
-                //}
-                //if (guestInBonus == true) {
-                    //scoreboardGraphics.fillOval(1284,549,60,60);
-                //}
-	    }
-	}
-        scoreboardImageCanvas.repaint(520,510,880,130);
+        
     }
 
     public synchronized void paintHomeName() {
@@ -642,43 +463,35 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         FontMetrics fontInfo;
         int nameWidth;
         
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(20,20,920,150,20,20);
-        scoreboardGraphics.setColor(scoreColor);
+        scoreboardGraphics.setColor(Color.RED);
+        scoreboardGraphics.fillRoundRect(20,340,920,170,40,40);
+        scoreboardGraphics.setColor(Color.BLACK);
         do {
             scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, fontSize));
             fontInfo = scoreboardGraphics.getFontMetrics();
             nameWidth = fontInfo.stringWidth(nameHome);
             fontSize--;
         } while (nameWidth > 900);
-        if (nameHome.contains("y") || nameHome.contains("g") || nameHome.contains("p") || nameHome.contains("q")) {
-            scoreboardGraphics.drawString(nameHome, (480-(nameWidth/2)), (60+(fontSize/2)));
-        } else{
-            scoreboardGraphics.drawString(nameHome,(480-(nameWidth/2)), (70+(fontSize/2)));
-        }
-        scoreboardImageCanvas.repaint(20,20,920,150);
+        scoreboardGraphics.drawString(nameHome,(480-(nameWidth/2)), (400+(fontSize/2)));
+        scoreboardImageCanvas.repaint(20,340,920,150);
     }
 
     public synchronized void paintGuestName() { 
         int fontSize = 150;
         FontMetrics fontInfo;
         int nameWidth;
-        
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(980,20,920,150,20,20);
-        scoreboardGraphics.setColor(scoreColor);
+
+        scoreboardGraphics.setColor(Color.YELLOW);
+        scoreboardGraphics.fillRoundRect(980,340,920,170,40,40);
+        scoreboardGraphics.setColor(Color.BLACK);
         do {
             scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, fontSize));
             fontInfo = scoreboardGraphics.getFontMetrics();
             nameWidth = fontInfo.stringWidth(nameGuest);
             fontSize--;
         } while (nameWidth > 900);
-        if (nameGuest.contains("y") || nameGuest.contains("g") || nameGuest.contains("p") || nameGuest.contains("q")) {
-            scoreboardGraphics.drawString(nameGuest, (1440-(nameWidth/2)), (60+(fontSize/2)));
-        } else{
-            scoreboardGraphics.drawString(nameGuest,(1440-(nameWidth/2)), (70+(fontSize/2)));
-        }
-        scoreboardImageCanvas.repaint(980,20,920,150);
+        scoreboardGraphics.drawString(nameGuest,(1440-(nameWidth/2)), (400+(fontSize/2)));
+        scoreboardImageCanvas.repaint(980,340,920,150);
     }
 
     public synchronized void paintHomeScore() { 
@@ -687,112 +500,29 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 	FontMetrics fontInfo;
 
         scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(20,190,480,450,20,20);
+        scoreboardGraphics.fillRoundRect(20,530,750,500,40,40);
         scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, scoreFontSize));
         scoreboardGraphics.setColor(scoreColor);
 	    fontInfo = scoreboardGraphics.getFontMetrics();
 	    scoreWidth = fontInfo.stringWidth(score);
-        scoreboardGraphics.drawString(score, (260 - (scoreWidth/2)), 550);
-        scoreboardImageCanvas.repaint(20,190,480,450);
+        scoreboardGraphics.drawString(score, (400 - (scoreWidth/2)), 990);
+        scoreboardImageCanvas.repaint(20,530,750,500);
     }
 
     public synchronized void paintGuestScore() { 
         String score = scoreGuest < 10 ? "0" + scoreGuest : "" + scoreGuest;
 	int scoreWidth;
 	FontMetrics fontInfo;
-
         scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(1420,190,480,450,20,20);
+        scoreboardGraphics.fillRoundRect(1150,530,750,500,40,40);
         scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, scoreFontSize));
         scoreboardGraphics.setColor(scoreColor);
 	fontInfo = scoreboardGraphics.getFontMetrics();
 	scoreWidth = fontInfo.stringWidth(score);
-        scoreboardGraphics.drawString(score, (1660 - (scoreWidth/2)), 550);
-        scoreboardImageCanvas.repaint(1420,190,480,450);
+        scoreboardGraphics.drawString(score, (1530 - (scoreWidth/2)), 990);
+        scoreboardImageCanvas.repaint(1150,530,750,500);
     }
 
-    public synchronized void paintPossesionArrow() {
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 35));
-
-        scoreboardGraphics.fillRoundRect(540,423,840,90,20,20);
-        scoreboardGraphics.setColor(textColor);
-        if (scoreboardMode == 1) {
-            scoreboardGraphics.drawString("SERVING", 775, 490);
-	} else {
-            scoreboardGraphics.drawString("POSSESSION", 691, 490);
-	}
-        scoreboardGraphics.setColor(possesionArrowColor);
-        if (possesionArrow == true) {
-            scoreboardGraphics.fillOval(564,441,60,60);
-        } else {
-            scoreboardGraphics.fillOval(1284,441,60,60);
-        }
-        scoreboardImageCanvas.repaint(540,423,840,90);
-    }
-
-    public synchronized void paintFoulsSets() {
-        String homeFouls;
-        String lastHome;
-        String guestFouls;
-        String lastGuest;
-
-    if (scoreboardMode == 1) {
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(240,423,480,90,20,20);
-        scoreboardGraphics.fillRoundRect(1416,531,480,90,20,20);
-        scoreboardGraphics.fillRoundRect(240,531,480,90,20,20);
-        scoreboardGraphics.fillRoundRect(1416,423,480,90,20,20);
-
-        scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 40));
-        scoreboardGraphics.setColor(textColor);
-        scoreboardGraphics.drawString("SETS", 55, 275);
-        scoreboardGraphics.drawString("SETS", 635, 275);
-        scoreboardGraphics.drawString(""+setsHome, 95, 335);
-        scoreboardGraphics.drawString(""+setsGuest, 675, 335);
-
-        scoreboardImageCanvas.repaint(10,235,200,50);
-        scoreboardImageCanvas.repaint(10,295,200,50);
-        scoreboardImageCanvas.repaint(590,235,200,50);
-        scoreboardImageCanvas.repaint(590,295,200,50);
-	// fix screen updates for volleyball mode (this hack works ;-)
-	paint();
-    } else {
-        homeFouls = "Fouls: " + totalHomeFouls;
-//   System.out.println(" lastHomePlayer is -" + lastHomePlayer + "-");
-	if (lastHomePlayer != null && lastHomePlayer.length() > 0) {
-            lastHome = "Last: " + lastHomePlayer + "-" + lastHomeFouls;
-	} else {
-            lastHome = ".";
-	}
-        guestFouls = "Fouls: " + totalGuestFouls;
-//   System.out.println(" lastGuestPlayer is -" + lastGuestPlayer + "-");
-	if (lastGuestPlayer != null && lastGuestPlayer.length() > 0) {
-            lastGuest = "Last: " + lastGuestPlayer + "-" + lastGuestFouls;
-	} else {
-            lastGuest = ".";
-	}
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(240,423,480,90,20,20);
-        scoreboardGraphics.fillRoundRect(240,531,480,90,10,20);
-        scoreboardGraphics.fillRoundRect(1416,423,480,90,20,20);
-        scoreboardGraphics.fillRoundRect(1416,531,480,90,20,20);
-        if ((totalHomeFouls+totalGuestFouls) > 0) {
-            scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 35));
-            scoreboardGraphics.setColor(textColor);
-            scoreboardGraphics.drawString(homeFouls, 480, 495);
-            scoreboardGraphics.drawString(guestFouls, 1440, 495);
-            if (lastHomePlayer != null && totalHomeFouls > 0)
-                    scoreboardGraphics.drawString(lastHome, 480, 603);
-            if (lastGuestPlayer != null && totalGuestFouls > 0)
-                scoreboardGraphics.drawString(lastGuest, 1440, 603);
-        }
-        scoreboardImageCanvas.repaint(240,423,480,90);
-        scoreboardImageCanvas.repaint(240,531,480,90);
-        scoreboardImageCanvas.repaint(1416,423,480,90);
-        scoreboardImageCanvas.repaint(1416,531,480,90);
-      }
-    }
 
     private int intValue(String str) {
         int returnValue;
@@ -837,49 +567,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         return(returnValue);
     }
 
-    public void addHomeFoul(String playerNumberText) {
-        int i, playerToAdd;
 
-        i = 0;
-        while (homePlayers[i] != null && !playerNumberText.equals(homePlayers[i]))
-            i++;
-        if (playerNumberText.equals(homePlayers[i])) {
-            homeFouls[i]++;
-        } else {
-            homePlayers[i] = playerNumberText;
-            homePlayers[i+1] = null;
-            homeFouls[i] = 1;
-        }
-        prevTeam = 0;
-        prevPlayer = lastHomePlayer;
-        prevFouls = lastHomeFouls;
-        lastIndex = i;
-        lastHomePlayer = playerNumberText;
-        lastHomeFouls = homeFouls[i];
-        totalHomeFouls++;
-    }
-
-    public void addGuestFoul(String playerNumberText) {
-        int i, playerToAdd;
-
-        i = 0;
-        while (guestPlayers[i] != null && !playerNumberText.equals(guestPlayers[i]))
-            i++;
-        if (playerNumberText.equals(guestPlayers[i])) {
-            guestFouls[i]++;
-        } else {
-            guestPlayers[i] = playerNumberText;
-            guestPlayers[i+1] = null;
-            guestFouls[i] = 1;
-        }
-        prevTeam = 1;
-        prevPlayer = lastGuestPlayer;
-        prevFouls = lastGuestFouls;
-        lastIndex = i;
-        lastGuestPlayer = playerNumberText;
-        lastGuestFouls = guestFouls[i];
-        totalGuestFouls++;
-    }
 
     public void actionPerformed(ActionEvent event) {
         Object source = event.getSource();
@@ -906,13 +594,11 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             timeoutTimer.cont();
             starttoButton.setEnabled(false);
             cleartoButton.setEnabled(true);
-	    paintBonus();
         } else if (source == cleartoButton) {
             timeoutTimer.pause();
             timeoutTimer.setTimer(0);
             starttoButton.setEnabled(true);
             cleartoButton.setEnabled(false);
-	    paintBonus();
         } else if (source == stopButton) {
             scoreboardTimer.pause();
             startButton.setEnabled(true);
@@ -930,71 +616,42 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 	        totalGuestFouls--;
             }
 	    lastIndex = -1;
-            paintFoulsSets();
-        } else if (source == resetSlidesButton) {
-            if (scoreboardSlides != null) {
-                scoreboardSlides.reset(	getCodeBase(), slideShowDir,
-					numSlides, slideDelay);
-	    }
         } else if (source == resetButton) {
             resetScoreboard();
         } else if (source == modeButton) {
-	    if (scoreboardMode == 0) {
-		scoreboardMode = 1;
-		periodUpButton.setLabel("Game+");
-		periodDnButton.setLabel("Game-");
-		homeBonusButton.setLabel("Home Set+");
-		guestBonusButton.setLabel("Guest Set+");
-		homeFoulsButton.setLabel("Home Set-");
-		guestFoulsButton.setLabel("Guest Set-");
-		clearTeamFoulsButton.setLabel("Clear Sets");
-		clearAllFoulsButton.setLabel("Clear Points");
-		possesionButton.setLabel("Serving");
-		settimeButton.setLabel(" ");
-		settimeButton.setEnabled(false);
-		startButton.setLabel(" ");
-		startButton.setEnabled(false);
-		stopButton.setLabel(" ");
-		stopButton.setEnabled(false);
-		homeuptwoButton.setLabel(" ");
-		homeuptwoButton.setEnabled(false);
-		guestuptwoButton.setLabel(" ");
-		guestuptwoButton.setEnabled(false);
-		undoLastButton.setLabel(" ");
-		undoLastButton.setEnabled(false);
-		modeButton.setLabel("Basketball");
-	    } else {
+	    if (scoreboardMode == 0){
 		scoreboardMode = 0;
 		periodUpButton.setLabel("Period+");
 		periodDnButton.setLabel("Period-");
-		homeBonusButton.setLabel("Home Bonus");
-		guestBonusButton.setLabel("Guest Bonus");
-		homeFoulsButton.setLabel("Home Foul");
-		guestFoulsButton.setLabel("Guest Foul");
 		clearTeamFoulsButton.setLabel("Clear Team Fouls");
 		clearAllFoulsButton.setLabel("Clear All Fouls");
-		possesionButton.setLabel("Poss Arrow");
 		settimeButton.setLabel("Set Timer");
 		settimeButton.setEnabled(true);
 		startButton.setLabel("Start");
-		stopButton.setLabel("Stop");
+        stopButton.setLabel("Stop");
+        homeupthreeButton.setLabel("Home Pt+3");
+        homeupthreeButton.setEnabled(true);
 		homeuptwoButton.setLabel("Home Pt+2");
-		homeuptwoButton.setEnabled(true);
+        homeuptwoButton.setEnabled(true);
+        guestupthreeButton.setLabel("Home Pt+3");
+        guestupthreeButton.setEnabled(true);
 		guestuptwoButton.setLabel("Guest Pt+2");
 		guestuptwoButton.setEnabled(true);
 		undoLastButton.setLabel("Undo Last Foul");
 		undoLastButton.setEnabled(true);
-		modeButton.setLabel("Volleyball");
 	    }
             resetScoreboard();
+        } else if (source == homeupthreeButton) {
+            scoreHome += 3;
+            paintHomeScore();
         } else if (source == homeuptwoButton) {
-            scoreHome += 2;
+            scoreHome+=2;
             paintHomeScore();
-        } else if (source == homeupButton) {
-            scoreHome++;
+        } else if (source == homedntwoButton) {
+            if (scoreHome > 1) scoreHome -= 2;
             paintHomeScore();
-        } else if (source == homednButton) {
-            if (scoreHome > 0) scoreHome--;
+        } else if (source == homednthreeButton) {
+            if (scoreHome > 2) scoreHome -= 3;
             paintHomeScore();
         } else if (source == homesetButton) {
             scoreHome = intValue(scoreText.getText());
@@ -1002,101 +659,29 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         } else if (source == guestuptwoButton) {
             scoreGuest += 2;
             paintGuestScore();
-        } else if (source == guestupButton) {
-            scoreGuest++;
+        } else if (source == guestupthreeButton) {
+            scoreGuest += 3;
             paintGuestScore();
-        } else if (source == guestdnButton) {
-            if (scoreGuest > 0) scoreGuest--;
+        } else if (source == guestdntwoButton) {
+            if (scoreGuest > 1) scoreGuest -= 2;
+            paintGuestScore();
+        } else if (source == guestdnthreeButton) {
+            if (scoreGuest > 2) scoreGuest -= 3;
             paintGuestScore();
         } else if (source == guestsetButton) {
             scoreGuest = intValue(scoreText.getText());
             paintGuestScore();
-        } else if (source == possesionButton) {
-            possesionArrow = !possesionArrow;
-            paintPossesionArrow();
-        } else if (source == homeBonusButton) {
-	    if (scoreboardMode == 1) {
-		setsHome++;
-		paintFoulsSets();
-	    } else {
-                homeInBonus = !homeInBonus;
-                paintBonus();
-	    }
-        } else if (source == guestBonusButton) {
-	    if (scoreboardMode == 1) {
-		setsGuest++;
-		paintFoulsSets();
-	    } else {
-                guestInBonus = !guestInBonus;
-                paintBonus();
-	    }
         } else if (source == periodOneButton) {
             periodNumber = 1;
             paintPeriod();
         } else if (source == periodUpButton) {
-            periodNumber++;
-            paintPeriod();
+            if (periodNumber <= maxPeriods){
+                periodNumber++;
+                paintPeriod();
+            }
         } else if (source == periodDnButton) {
             if (periodNumber > 1) periodNumber--;
             paintPeriod();
-        } else if (source == homeFoulsButton) {
-	    if (scoreboardMode == 1) {
-		if (setsHome > 0) setsHome--;
-	    } else {
-                addHomeFoul(foulPlayerText.getText());
-	    }
-            paintFoulsSets();
-        } else if (source == guestFoulsButton) {
-	    if (scoreboardMode == 1) {
-		if (setsGuest > 0) setsGuest--;
-	    } else {
-                addGuestFoul(foulPlayerText.getText());
-	    }
-            paintFoulsSets();
-        } else if (source == hornButton) {
-            if (hornSound != null) {
-                hornSound.play();
-            }
-        } else if (source == beepButton) {
-            if (beepSound != null) {
-                beepSound.play();
-            }
-        } else if (source == clearTeamFoulsButton) {
-	    if (scoreboardMode == 1) {
-		setsHome = 0;
-		setsGuest = 0;
-	    } else {
-                totalHomeFouls = 0;
-                totalGuestFouls = 0;
-	    }
-            paintFoulsSets();
-        } else if (source == clearAllFoulsButton) {
-	    if (scoreboardMode == 1) {
-		scoreHome = 0;
-		scoreGuest = 0;
-		paintHomeScore();
-		paintGuestScore();
-	    } else {
-		homePlayers[0] = null;
-		totalHomeFouls = 0;
-		lastHomePlayer = null;
-		guestPlayers[0] = null;
-		totalGuestFouls = 0;
-		lastGuestPlayer = null;
-		paintFoulsSets();
-	    }
-        } else if (source == suspendSlidesButton) {
-            if (scoreboardSlides != null) {
-                scoreboardSlides.pause();
-            }
-        } else if (source == clearSlidesButton) {
-            if (scoreboardSlides != null) {
-                scoreboardSlides.clear();
-            }
-        } else if (source == resumeSlidesButton) {
-            if (scoreboardSlides != null) {
-                scoreboardSlides.cont();
-            }
         }
     }
 
@@ -1122,7 +707,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             } catch (InterruptedException e) { e.printStackTrace(); }
 
             if (lastTimeoutTimerValue != timeoutTimer.timerValue) {
-                paintBonus();
                 if (timeoutTimer.timerValue == 0) {
                     cleartoButton.setEnabled(false);
                     starttoButton.setEnabled(true);
@@ -1156,11 +740,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         appletThread = null;
     }
 
-    public void update(Graphics g) {
-        paint(g);
-        scoreboardSlides.repaint();
-
-    }
 
     public void paint(Graphics g) {
         scoreboardGraphics.drawImage(scoreboardImage, 0, 0, this);
@@ -1183,10 +762,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             { "textColor", "hexadecimal int", "the color of the other text (default=yellow)."},
             { "fillColor", "hexadecimal int", "the color between the text areas (default=lightGray)."},
             { "bonusLightColor", "hexadecimal int", "the color of the bonus lights (default=red)."},
-            { "possesionArrowColor", "hexadecimal int", "the color of the possesion arrow (default=red)."},
             { "preferredFont", "String", "the font for all fields (default=Helvetica)."},
-            { "slideDelay", "int", "the number of seconds to display slides (default=15)."},
-            { "slideShowDir", "String", "the full path to the folder where slide images are stored, no slides displayed if not specified."},
             { "framePositionX", "int", "the left-to-right position of the scoreboard (default 340)."},
             { "framePositionY", "int", "the top-to-bottom position of the scoreboard (default 0)."},
             { "buttonFontSize", "int", "the size of the button font (default=14)."},

@@ -1,24 +1,18 @@
 <HTML><HEAD><TITLE>ScoreBoard</TITLE></HEAD><BODY>
 
 <APPLET CODE="ScoreBoard.class" WIDTH=480 HEIGHT=480>
-<PARAM NAME = "maxPeriods" VALUE = "1">
+<PARAM NAME = "maxPeriods" VALUE = "2">
 <PARAM NAME = "bgColor" VALUE = "000000">
 <PARAM NAME = "timeColor" VALUE = "ffff00">
 <PARAM NAME = "timeFontSize" VALUE = "330">
 <PARAM NAME = "lastMinuteTimeColor" VALUE = "ff8080">
-<PARAM NAME = "scoreFontSize" VALUE = "400">
-<PARAM NAME = "scoreColor" VALUE = "00ff00">
+<PARAM NAME = "scoreFontSize" VALUE = "600">
+<PARAM NAME = "scoreColor" VALUE = "ffffff">
 <PARAM NAME = "textColor" VALUE = "ffff00">
 <PARAM NAME = "fillColor" VALUE = "808080">
-<PARAM NAME = "bonusLightColor" VALUE = "ff8080">
-<PARAM NAME = "possesionArrowColor" VALUE = "ff8080">
-<PARAM NAME = "preferredFont" VALUE = "Helvetica">
-<PARAM NAME = "slideShowDir" VALUE = "./slides/">
-<PARAM NAME = "numSlides" VALUE = "15">
-<PARAM NAME = "slideDelay" VALUE = "12">
 <PARAM NAME = "framePositionX" VALUE = "1020">
 <PARAM NAME = "framePositionY" VALUE = "-26">
-<PARAM NAME = "buttonFontSize" VALUE = "16">
+<PARAM NAME = "buttonFontSize" VALUE = "20">
 </APPLET>
 
 </BODY></HTML>
