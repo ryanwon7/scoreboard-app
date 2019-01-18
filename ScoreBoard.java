@@ -53,6 +53,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     String tagString = "ScoreBoard Version 3.5 - January 6, 2009";
     String copyString = "Copyright (C) 1999-2009 Bery Rinaldo";
 
+    Toolkit toolkit = Toolkit.getDefaultToolkit();
     URL hornSoundFile, beepSoundFile;
     AudioClip hornSound, beepSound;
     Timer scoreboardTimer;
@@ -112,6 +113,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     int framePositionX;
     int framePositionY;
     Color guestColor;
+
+    Image logoJBA;
     
     public void init() {
 
@@ -143,6 +146,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         windowFrame.show();
         startSounds();
         transferFocus();
+        logoJBA = toolkit.getImage("Caleb JBA.png");
     }
 
     public void getParamTags() {
@@ -372,6 +376,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         paintGuestScore();
         periodNumber = 1;
         paintPeriod();
+        paintLogos();
         scoreboardImageCanvas.repaint();
     }
 
@@ -394,6 +399,10 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         }
     }
 
+    public synchronized void paintLogos() {
+        scoreboardGraphics.drawImage(logoJBA, 1920, 20, this);
+        scoreboardImageCanvas.repaint(1920, 20, 400, 400);
+    }
     public synchronized void paintTimer() {
         String sMin, sSec, sMil, sTim;
         int dMin, dSec, dMil, dTime = 0;
@@ -454,6 +463,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             scoreboardGraphics.setColor(Color.WHITE);
             scoreboardGraphics.drawString(periodString, 835, 820);
             scoreboardImageCanvas.repaint(835,600,250,300);
+
 	    }
         
     }
