@@ -75,7 +75,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
        homeupthreeButton, guestupthreeButton,
        homednthreeButton, guestdnthreeButton,
 	   starttoButton, cleartoButton,
-           resetButton, undoLastButton;
+           resetButton, undoLastButton, switchButton;
     boolean homeInBonus;
     boolean guestInBonus;
     int scoreHome, scoreGuest;
@@ -92,6 +92,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     int guestFouls[] = new int[50];
     int totalGuestFouls;
     String lastHomePlayer, lastGuestPlayer;
+    String tempName;
     int lastHomeFouls, lastGuestFouls;
     // for undo capability
     int lastIndex = -1;
@@ -105,6 +106,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     int timeFontSize;
     Color lastMinuteTimeColor;
     Color scoreColor;
+    Color homeNameColor;
+    Color guestNameColor;
     int scoreFontSize;
     int buttonFontSize;
     Color textColor;
@@ -112,9 +115,11 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     String preferredFont;
     int framePositionX;
     int framePositionY;
+    int tempScore;
     Color guestColor;
 
     Image logoJBA;
+    Image logoJesuwon;
     
     public void init() {
 
@@ -127,6 +132,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 	System.out.println("See the file gpl.txt for details.");
 
         getParamTags();
+        logoJBA = toolkit.getImage("JBA CALEBv2.png");
+        logoJesuwon = toolkit.getImage("jesuwon1.png");
         setupControlPanel();
         scoreboardImage = createImage(1920,1080);
         scoreboardGraphics = scoreboardImage.getGraphics();
@@ -137,6 +144,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         windowFrame.setLayout(new BorderLayout());
         windowFrame.add("North", scoreboardImageCanvas);
         windowFrame.pack();
+        homeNameColor = Color.RED;
+        guestNameColor = Color.YELLOW;
         scoreboardTimer = new Timer(0);
         scoreboardTimer.start();
         timeoutTimer = new Timer(0);
@@ -146,7 +155,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         windowFrame.show();
         startSounds();
         transferFocus();
-        logoJBA = toolkit.getImage("Caleb JBA.png");
     }
 
     public void getParamTags() {
@@ -316,7 +324,11 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 
         resetButton = new Button("Reset");
         resetButton.addActionListener(this);
-	    resetButton.setFont(buttonFont);
+        resetButton.setFont(buttonFont);
+        
+        switchButton = new Button("Switch Sides");
+        switchButton.addActionListener(this);
+        switchButton.setFont(buttonFont);
 
         setLayout(new GridLayout(11,2,3,3)); // 13 rows, 3 cols, 3 pixel gaps
 
@@ -352,6 +364,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         add(periodDnButton);
 
         add(resetButton);
+        add(switchButton);
 
 
     }
@@ -400,8 +413,10 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     }
 
     public synchronized void paintLogos() {
-        scoreboardGraphics.drawImage(logoJBA, 1920, 20, this);
-        scoreboardImageCanvas.repaint(1920, 20, 400, 400);
+        scoreboardGraphics.drawImage(logoJBA, 20, 30, this);
+        scoreboardImageCanvas.repaint(20, 30, 480, 279);
+        scoreboardGraphics.drawImage(logoJesuwon, 1420, 74, this);
+        scoreboardImageCanvas.repaint(1402, 74, 480, 192);
     }
     public synchronized void paintTimer() {
         String sMin, sSec, sMil, sTim;
@@ -473,7 +488,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         FontMetrics fontInfo;
         int nameWidth;
         
-        scoreboardGraphics.setColor(Color.RED);
+        scoreboardGraphics.setColor(homeNameColor);
         scoreboardGraphics.fillRoundRect(20,340,920,170,40,40);
         scoreboardGraphics.setColor(Color.BLACK);
         do {
@@ -491,7 +506,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         FontMetrics fontInfo;
         int nameWidth;
 
-        scoreboardGraphics.setColor(Color.YELLOW);
+        scoreboardGraphics.setColor(guestNameColor);
         scoreboardGraphics.fillRoundRect(980,340,920,170,40,40);
         scoreboardGraphics.setColor(Color.BLACK);
         do {
@@ -628,29 +643,24 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 	    lastIndex = -1;
         } else if (source == resetButton) {
             resetScoreboard();
-        } else if (source == modeButton) {
-	    if (scoreboardMode == 0){
-		scoreboardMode = 0;
-		periodUpButton.setLabel("Period+");
-		periodDnButton.setLabel("Period-");
-		clearTeamFoulsButton.setLabel("Clear Team Fouls");
-		clearAllFoulsButton.setLabel("Clear All Fouls");
-		settimeButton.setLabel("Set Timer");
-		settimeButton.setEnabled(true);
-		startButton.setLabel("Start");
-        stopButton.setLabel("Stop");
-        homeupthreeButton.setLabel("Home Pt+3");
-        homeupthreeButton.setEnabled(true);
-		homeuptwoButton.setLabel("Home Pt+2");
-        homeuptwoButton.setEnabled(true);
-        guestupthreeButton.setLabel("Home Pt+3");
-        guestupthreeButton.setEnabled(true);
-		guestuptwoButton.setLabel("Guest Pt+2");
-		guestuptwoButton.setEnabled(true);
-		undoLastButton.setLabel("Undo Last Foul");
-		undoLastButton.setEnabled(true);
-	    }
-            resetScoreboard();
+        } else if (source == switchButton) {
+            tempScore = scoreGuest;
+            scoreGuest = scoreHome;
+            scoreHome = tempScore;
+            tempName = nameGuest;
+            nameGuest = nameHome;
+            nameHome = tempName;
+            if (homeNameColor == Color.RED) {
+                homeNameColor = Color.YELLOW;
+                guestNameColor = Color.RED;
+            } else {
+                homeNameColor = Color.RED;
+                guestNameColor = Color.YELLOW;
+            }
+            paintHomeName();
+            paintGuestName();
+            paintHomeScore();
+            paintGuestScore();
         } else if (source == homeupthreeButton) {
             scoreHome += 3;
             paintHomeScore();
