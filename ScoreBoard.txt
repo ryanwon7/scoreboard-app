@@ -12,7 +12,7 @@
 <PARAM NAME = "fillColor" VALUE = "808080">
 <PARAM NAME = "framePositionX" VALUE = "1020">
 <PARAM NAME = "framePositionY" VALUE = "-26">
-<PARAM NAME = "buttonFontSize" VALUE = "20">
+<PARAM NAME = "buttonFontSize" VALUE = "30">
 </APPLET>
 
 </BODY></HTML>

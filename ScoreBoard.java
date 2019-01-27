@@ -5,7 +5,7 @@
 // for basketball, volleyball and wrestling.
 //
 // Written by Bery Rinaldo on December 26, 1999
-//
+// Updated and modified by Ryan Won on January 26, 2019
 // Version 1 - April 17, 2002
 // * Added GPL -- See gpl.txt and LICENSE.txt
 // * Updated SlideShow to work properly with Java 2 v1.3.1
@@ -38,7 +38,11 @@
 // * Added maxPeriods option in the ScoreBoard.txt and ScoreBoard.java to
 //   allow for 6 period games (Thanks for the suggestion, Roger).
 //
+// Version 4 - January 26, 2019
+// * Changed stuff
+//
 // Copyright (c) 1999-2009 Bery Rinaldo
+// Copyright (c) 2019 Ryan Won
 
 import java.util.*;
 import java.text.*;
@@ -69,12 +73,11 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
            sethomeButton, setguestButton, settimeButton,
            possesionButton, homeBonusButton, guestBonusButton,
            periodUpButton, periodOneButton, periodDnButton,
-           homeFoulsButton, hornButton,
-           guestFoulsButton, beepButton,
-           clearAllFoulsButton, clearTeamFoulsButton,
        homeupthreeButton, guestupthreeButton,
        homednthreeButton, guestdnthreeButton,
-	   starttoButton, cleartoButton,
+       homeTOButton, guestTOButton, resetTOButton,
+       homeResetTOButton, guestResetTOButton,
+	   startTOButton, clearTOButton,
            resetButton, undoLastButton, switchButton;
     boolean homeInBonus;
     boolean guestInBonus;
@@ -83,21 +86,14 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     int periodNumber;
     int maxPeriods;
     String nameHome, nameGuest;
+    String tempName;
     TextField homeText, guestText, timerText, foulPlayerText,
               timeoutText, scoreText;
-    String homePlayers[] = new String[50];
-    int homeFouls[] = new int[50];
-    int totalHomeFouls;
-    String guestPlayers[] = new String[50];
-    int guestFouls[] = new int[50];
-    int totalGuestFouls;
-    String lastHomePlayer, lastGuestPlayer;
-    String tempName;
-    int lastHomeFouls, lastGuestFouls;
+    int homeTimeouts;
+    int guestTimeouts;
     // for undo capability
     int lastIndex = -1;
     String prevPlayer;
-    int prevFouls;
     int prevTeam;	
     int scoreboardMode;// Home = 0, Guest = 1
 
@@ -116,7 +112,9 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     int framePositionX;
     int framePositionY;
     int tempScore;
+    int tempTimeouts;
     Color guestColor;
+    String tempText;
 
     Image logoJBA;
     Image logoJesuwon;
@@ -129,7 +127,9 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 	System.out.println("ScoreBoard comes with ABSOLUTELY NO WARRANTY. ");
 	System.out.println("This is free software, and you are welcome");
 	System.out.println("to redistribute it under certain conditions.");
-	System.out.println("See the file gpl.txt for details.");
+    System.out.println("See the file gpl.txt for details.");
+    System.out.println("Modified and updated by Ryan Won, January 2019");
+    System.out.println("Used for noncommerical purposes for the Annual Jesuwon Basketball Tournament");
 
         getParamTags();
         logoJBA = toolkit.getImage("JBA CALEBv2.png");
@@ -150,7 +150,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         scoreboardTimer.start();
         timeoutTimer = new Timer(0);
         timeoutTimer.start();
-	    scoreboardMode = 0;
         resetScoreboard();
         windowFrame.show();
         startSounds();
@@ -241,13 +240,14 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     }
      
     public void setupControlPanel() {
-	Font buttonFont = new Font("Helvetica", Font.BOLD, buttonFontSize); 
+        Font buttonFont = new Font("Helvetica", Font.BOLD, buttonFontSize); 
+        Font textFieldFont = new Font("Helvetica", Font.BOLD, 50);
         homeText = new TextField(10);
+        homeText.setFont(textFieldFont);
         guestText = new TextField(10);
+        guestText.setFont(textFieldFont);
         timerText = new TextField(10);
-        foulPlayerText = new TextField(10);
-        timeoutText = new TextField(10);
-        scoreText = new TextField(10);
+        timerText.setFont(textFieldFont);
 
 
         periodUpButton = new Button("Period+");
@@ -272,55 +272,79 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         settimeButton.addActionListener(this);
 	    settimeButton.setFont(buttonFont);
 
-        homeupthreeButton = new Button("Home Pt+3");
+        homeupthreeButton = new Button("Red Pt+3");
         homeupthreeButton.addActionListener(this);
 	    homeupthreeButton.setFont(buttonFont);
 
-        homeuptwoButton = new Button("Home Pt+2");
+        homeuptwoButton = new Button("Red Pt+2");
         homeuptwoButton.addActionListener(this);
 	    homeuptwoButton.setFont(buttonFont);
 
-        homednthreeButton = new Button("Home Pt-3");
+        homednthreeButton = new Button("Red Pt-3");
         homednthreeButton.addActionListener(this);
         homednthreeButton.setFont(buttonFont);
         
-        homedntwoButton = new Button("Home Pt-2");
+        homedntwoButton = new Button("Red Pt-2");
         homedntwoButton.addActionListener(this);
 	    homedntwoButton.setFont(buttonFont);
 
-        homesetButton = new Button("Home Pt Reset");
+        homesetButton = new Button("Red Pt Reset");
         homesetButton.addActionListener(this);
 	    homesetButton.setFont(buttonFont);
 
         startButton = new Button("Start");
         startButton.addActionListener(this);
         startButton.setEnabled(false);
-	    startButton.setFont(buttonFont);
+        startButton.setFont(buttonFont);
 
         stopButton = new Button("Stop");
         stopButton.addActionListener(this);
         stopButton.setEnabled(false);
 	    stopButton.setFont(buttonFont);
 
-        guestupthreeButton = new Button("Guest Pt+3");
+        guestupthreeButton = new Button("Yellow Pt+3");
         guestupthreeButton.addActionListener(this);
 	    guestupthreeButton.setFont(buttonFont);
 
-        guestuptwoButton = new Button("Guest Pt+2");
+        guestuptwoButton = new Button("Yellow Pt+2");
         guestuptwoButton.addActionListener(this);
 	    guestuptwoButton.setFont(buttonFont);
 
-        guestdntwoButton = new Button("Guest Pt-2");
+        guestdntwoButton = new Button("Yellow Pt-2");
         guestdntwoButton.addActionListener(this);
         guestdntwoButton.setFont(buttonFont);
         
-        guestdnthreeButton = new Button("Guest Pt-3");
+        guestdnthreeButton = new Button("Yellow Pt-3");
         guestdnthreeButton.addActionListener(this);
 	    guestdnthreeButton.setFont(buttonFont);
 
-        guestsetButton = new Button("Guest Pt Reset");
+        guestsetButton = new Button("Yellow Pt Reset");
         guestsetButton.addActionListener(this);
-	    guestsetButton.setFont(buttonFont);
+        guestsetButton.setFont(buttonFont);
+        
+        homeTOButton = new Button("Red Timeout");
+        homeTOButton.addActionListener(this);
+        homeTOButton.setFont(buttonFont);
+
+        guestTOButton = new Button("Yellow Timeout");
+        guestTOButton.addActionListener(this);
+        guestTOButton.setFont(buttonFont);
+
+        homeResetTOButton = new Button("Red Timeout Reset");
+        homeResetTOButton.addActionListener(this);
+        homeResetTOButton.setFont(buttonFont);
+
+        guestResetTOButton = new Button("Yellow Timeout Reset");
+        guestResetTOButton.addActionListener(this);
+        guestResetTOButton.setFont(buttonFont);
+
+        startTOButton = new Button("Start Timeout");
+        startTOButton.addActionListener(this);
+        startTOButton.setFont(buttonFont);
+
+        clearTOButton = new Button("Clear Timeout");
+        clearTOButton.addActionListener(this);
+        clearTOButton.setFont(buttonFont);
 
         resetButton = new Button("Reset");
         resetButton.addActionListener(this);
@@ -330,8 +354,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         switchButton.addActionListener(this);
         switchButton.setFont(buttonFont);
 
-        setLayout(new GridLayout(11,2,3,3)); // 13 rows, 3 cols, 3 pixel gaps
-
+        setLayout(new GridLayout(14,2,3,3));
         
         add(timerText);
         add(settimeButton);
@@ -360,12 +383,20 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         add(homesetButton);
         add(guestsetButton);
 
+        add(homeTOButton);
+        add(guestTOButton);
+
+        add(homeResetTOButton);
+        add(guestResetTOButton);
+
+        add(startTOButton);
+        add(clearTOButton);
+
         add(periodUpButton);
         add(periodDnButton);
 
         add(resetButton);
         add(switchButton);
-
 
     }
 
@@ -374,14 +405,14 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         scoreboardGraphics.fillRect(0,0,1920,1080);
         scoreboardTimer.pause();
         scoreboardTimer.setTimer(0);
-        timeoutTimer.pause();
-        timeoutTimer.setTimer(0);
         paintTimer();
         startButton.setEnabled(false);
         stopButton.setEnabled(false);
         nameHome = "RED";
+        homeNameColor = Color.RED;
         paintHomeName();
         nameGuest = "YELLOW";
+        guestNameColor = Color.YELLOW;
         paintGuestName();
         scoreHome = 0;
         paintHomeScore();
@@ -389,15 +420,18 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         paintGuestScore();
         periodNumber = 1;
         paintPeriod();
+        homeTimeouts = 3;
+        guestTimeouts = 3;
+        paintTimeouts();
         paintLogos();
         scoreboardImageCanvas.repaint();
     }
 
     private void startSounds() {
         try {
-            hornSoundFile = new URL(getCodeBase(), "horn.au");
+            hornSoundFile = new URL(getCodeBase(), "beep_long.wav");
         } catch (java.net.MalformedURLException e) {
-            System.err.println("can't form horn.au URL");
+            System.err.println("can't form beep_long.wav URL");
         }
         if (hornSoundFile != null) {
             hornSound = getAudioClip(hornSoundFile);
@@ -418,15 +452,53 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         scoreboardGraphics.drawImage(logoJesuwon, 1420, 74, this);
         scoreboardImageCanvas.repaint(1402, 74, 480, 192);
     }
+    public synchronized void paintTimeouts() {
+        String homeTOString;
+        String guestTOString;
+
+        homeTOString = homeTimeouts + "";
+        guestTOString = guestTimeouts + "";
+
+        scoreboardGraphics.setColor(bgColor);
+        scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 160));
+        scoreboardGraphics.fillRoundRect(790, 850, 140, 180, 40, 40);
+        scoreboardGraphics.setColor(Color.WHITE);
+        scoreboardGraphics.drawString(homeTOString, 820, 1000);
+        scoreboardImageCanvas.repaint(790, 850, 140, 180);
+
+        scoreboardGraphics.setColor(bgColor);
+        scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 160));
+        scoreboardGraphics.fillRoundRect(990, 850, 140, 180, 40, 40);
+        scoreboardGraphics.setColor(Color.WHITE);
+        scoreboardGraphics.drawString(guestTOString, 1020, 1000);
+        scoreboardImageCanvas.repaint(990, 850, 140, 180);
+    }
+    public synchronized void paintTimeoutTime() {
+        String sSec, sTim, sMil;
+        int dMin, dMil, dSec, dTime = 0;
+
+        dTime = timeoutTimer.timerValue;
+
+        dMin = dTime / 600;
+        dSec = (dTime / 10) % 60;
+        dMil = dTime % 10;
+
+        sSec = dSec < 10 ? "0" + dSec : "" + dSec;
+        sMil = "" + dMil;
+        sTim = ":" + sSec + "." + sMil;
+
+        scoreboardGraphics.setColor(bgColor);
+        scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, timeFontSize));
+
+        scoreboardGraphics.fillRoundRect(520,20,880,300,40,40);
+        scoreboardGraphics.setColor(lastMinuteTimeColor);
+        scoreboardGraphics.drawString(sTim, 590, 280);
+        scoreboardImageCanvas.repaint(520,20,880,300);
+    }
     public synchronized void paintTimer() {
         String sMin, sSec, sMil, sTim;
         int dMin, dSec, dMil, dTime = 0;
 
-      if (scoreboardMode == 1) {
-        scoreboardGraphics.setColor(bgColor);
-        scoreboardGraphics.fillRoundRect(520,20,880,300,40,40);
-        scoreboardImageCanvas.repaint(520,20,880,300);
-      } else {
         if (scoreboardTimer != null) dTime = scoreboardTimer.timerValue;
 
         dMin = dTime / 600;
@@ -441,7 +513,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             sMin = dMin < 10 ? "0" + dMin : "" + dMin;
             sSec = dSec < 10 ? "0" + dSec : "" + dSec;
             sTim = sMin + ":" + sSec;
-            scoreboardGraphics.fillRoundRect(530,20,880,300,40,40);
+            scoreboardGraphics.fillRoundRect(520,20,880,300,40,40);
             scoreboardGraphics.setColor(timeColor);
             scoreboardGraphics.drawString(sTim, 550, 280);
             scoreboardImageCanvas.repaint(520,20,880,300);
@@ -456,7 +528,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
           scoreboardGraphics.drawString(sTim, 590, 280);
           scoreboardImageCanvas.repaint(520,20,880,300);
         }
-      }
     }
 
     public synchronized void paintPeriod() { 
@@ -466,21 +537,19 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             periodString = periodNumber + "";
             scoreboardGraphics.setColor(bgColor);
             scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 300));
-            scoreboardGraphics.fillRoundRect(835,600,250,300,40,40);
+            scoreboardGraphics.fillRoundRect(835,530,250,300,40,40);
             scoreboardGraphics.setColor(Color.WHITE);
-            scoreboardGraphics.drawString(periodString, 880, 850);
-            scoreboardImageCanvas.repaint(835,600,250,300);
+            scoreboardGraphics.drawString(periodString, 880, 780);
+            scoreboardImageCanvas.repaint(835,530,250,300);
         } else {
             periodString = "OT";
             scoreboardGraphics.setColor(bgColor);
             scoreboardGraphics.setFont(new Font(preferredFont, Font.PLAIN, 175));
-            scoreboardGraphics.fillRoundRect(835,600,250,300,40,40);
+            scoreboardGraphics.fillRoundRect(835,530,250,300,40,40);
             scoreboardGraphics.setColor(Color.WHITE);
-            scoreboardGraphics.drawString(periodString, 835, 820);
-            scoreboardImageCanvas.repaint(835,600,250,300);
-
+            scoreboardGraphics.drawString(periodString, 835, 750);
+            scoreboardImageCanvas.repaint(835,530,250,300);
 	    }
-        
     }
 
     public synchronized void paintHomeName() {
@@ -548,6 +617,65 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         scoreboardImageCanvas.repaint(1150,530,750,500);
     }
 
+    public synchronized void switchButton() {
+        tempScore = scoreGuest;
+        scoreGuest = scoreHome;
+        scoreHome = tempScore;
+        tempName = nameGuest;
+        nameGuest = nameHome;
+        nameHome = tempName;
+        tempTimeouts = guestTimeouts;
+        guestTimeouts = homeTimeouts;
+        homeTimeouts = tempTimeouts;
+        tempText = guestText.getText();
+        guestText.setText(homeText.getText());
+        homeText.setText(tempText);
+        if (homeNameColor == Color.RED) {
+            homeNameColor = Color.YELLOW;
+            guestNameColor = Color.RED;
+            sethomeButton.setLabel("Yellow");
+            setguestButton.setLabel("Red");
+            homeupthreeButton.setLabel("Yellow Pt +3");
+            homeuptwoButton.setLabel("Yellow Pt +2");
+            homedntwoButton.setLabel("Yellow Pt -2");
+            homednthreeButton.setLabel("Yellow Pt -3");
+            homesetButton.setLabel("Yellow Pt Reset");
+            homeTOButton.setLabel("Yellow Timeout");
+            homeResetTOButton.setLabel("Yellow Timeout Reset");
+            guestupthreeButton.setLabel("Red Pt +3");
+            guestuptwoButton.setLabel("Red Pt +2");
+            guestdntwoButton.setLabel("Red Pt -2");
+            guestdnthreeButton.setLabel("Red Pt -3");
+            guestsetButton.setLabel("Red Pt Reset");
+            guestTOButton.setLabel("Red Timeout");
+            guestResetTOButton.setLabel("Red Timeout Reset");
+        } else {
+            homeNameColor = Color.RED;
+            guestNameColor = Color.YELLOW;
+            sethomeButton.setLabel("Red");
+            setguestButton.setLabel("Yellow");
+            homeupthreeButton.setLabel("Red Pt +3");
+            homeuptwoButton.setLabel("Red Pt +2");
+            homedntwoButton.setLabel("Red Pt -2");
+            homednthreeButton.setLabel("Red Pt -3");
+            homesetButton.setLabel("Red Pt Reset");
+            homeTOButton.setLabel("Red Timeout");
+            homeResetTOButton.setLabel("Red Timeout Reset");
+            guestupthreeButton.setLabel("Yellow Pt +3");
+            guestuptwoButton.setLabel("Yellow Pt +2");
+            guestdntwoButton.setLabel("Yellow Pt -2");
+            guestdnthreeButton.setLabel("Yellow Pt -3");
+            guestsetButton.setLabel("Yellow Pt Reset");
+            guestTOButton.setLabel("Yellow Timeout");
+            guestResetTOButton.setLabel("Yellow Timeout Reset");
+        }
+        paintHomeName();
+        paintGuestName();
+        paintHomeScore();
+        paintGuestScore();
+        paintTimeouts();
+}
+
 
     private int intValue(String str) {
         int returnValue;
@@ -613,54 +741,51 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             scoreboardTimer.cont();
             startButton.setEnabled(false);
             stopButton.setEnabled(true);
-        } else if (source == starttoButton) {
+            settimeButton.setEnabled(false);
+        } else if (source == homeTOButton) {
+            if (homeTimeouts > 0) {
+                homeTimeouts--;
+            }
+            paintTimeouts();
+        } else if (source == guestTOButton) {
+                if (guestTimeouts > 0) {
+                    guestTimeouts--;
+                }
+            paintTimeouts();
+        } else if (source == homeResetTOButton) {
+            homeTimeouts = 3;
+            paintTimeouts();
+        } else if (source == guestResetTOButton) {
+            guestTimeouts = 3;
+            paintTimeouts();
+        } else if (source == startTOButton) {
+            scoreboardTimer.pause();
+            startButton.setEnabled(false);
+            stopButton.setEnabled(false);
+            startButton.setEnabled(false);
             timeoutTimer.pause();
-            timeoutTimer.setTimer(convertTimeStringToInt(timeoutText.getText()));
+            timeoutTimer.setTimer(convertTimeStringToInt("0:30"));
+            paintTimeoutTime();
             timeoutTimer.cont();
-            starttoButton.setEnabled(false);
-            cleartoButton.setEnabled(true);
-        } else if (source == cleartoButton) {
+            startTOButton.setEnabled(false);
+            clearTOButton.setEnabled(true);
+        } else if (source == clearTOButton) {
             timeoutTimer.pause();
             timeoutTimer.setTimer(0);
-            starttoButton.setEnabled(true);
-            cleartoButton.setEnabled(false);
+            startTOButton.setEnabled(true);
+            clearTOButton.setEnabled(false);
+            startButton.setEnabled(true);
+            paintTimer();
+            startButton.setEnabled(true);
         } else if (source == stopButton) {
             scoreboardTimer.pause();
             startButton.setEnabled(true);
             stopButton.setEnabled(false);
-        } else if (source == undoLastButton) {
-            if (prevTeam == 0 && lastIndex != -1) {	// Home
-		lastHomePlayer = prevPlayer;
-	        lastHomeFouls = prevFouls;
-	        homeFouls[lastIndex]--;
-	        totalHomeFouls--;
-	    } else if (prevTeam == 1 && lastIndex != -1) {     // Guest
-		lastGuestPlayer = prevPlayer;
-	        lastGuestFouls = prevFouls;
-	        guestFouls[lastIndex]--;
-	        totalGuestFouls--;
-            }
-	    lastIndex = -1;
+            settimeButton.setEnabled(true);
         } else if (source == resetButton) {
             resetScoreboard();
         } else if (source == switchButton) {
-            tempScore = scoreGuest;
-            scoreGuest = scoreHome;
-            scoreHome = tempScore;
-            tempName = nameGuest;
-            nameGuest = nameHome;
-            nameHome = tempName;
-            if (homeNameColor == Color.RED) {
-                homeNameColor = Color.YELLOW;
-                guestNameColor = Color.RED;
-            } else {
-                homeNameColor = Color.RED;
-                guestNameColor = Color.YELLOW;
-            }
-            paintHomeName();
-            paintGuestName();
-            paintHomeScore();
-            paintGuestScore();
+            switchButton();
         } else if (source == homeupthreeButton) {
             scoreHome += 3;
             paintHomeScore();
@@ -727,9 +852,12 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             } catch (InterruptedException e) { e.printStackTrace(); }
 
             if (lastTimeoutTimerValue != timeoutTimer.timerValue) {
+                paintTimeoutTime();
                 if (timeoutTimer.timerValue == 0) {
-                    cleartoButton.setEnabled(false);
-                    starttoButton.setEnabled(true);
+                    clearTOButton.setEnabled(false);
+                    startTOButton.setEnabled(true);
+                    startButton.setEnabled(true);
+                    settimeButton.setEnabled(true);
                     if (beepSound != null) {
                         beepSound.play();
                     }
@@ -738,6 +866,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             if (lastScoreboardTimerValue != scoreboardTimer.timerValue) {
                 paintTimer();
                 if (scoreboardTimer.timerValue == 0) {
+                    settimeButton.setEnabled(true);
+                    stopButton.setEnabled(false);
                     if (hornSound != null) {
                         hornSound.play();
                     }
