@@ -24,7 +24,7 @@
 // * Change screen layout from 640x480 to 800x600 to match configuration
 //   of PC in the CLC (SongBase wants it like this, so we'll match).
 // * Added volleyball mode.
-// Version 3.1 - May 2, 2002
+// Version 3.1 - May 2, 2002  
 // * Fix screen updates for volleyball mode.
 // Version 3.2 - May 3, 2002
 // * Yet another fix screen updates for volleyball mode (this hack works ;-)
