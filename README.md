@@ -1,4 +1,4 @@
-<html><head><title>ScoreBoard App README</title></head>
+
 <body bgcolor=#ffffff><h1>ScoreBoard README</h1>
   This program runs the "electronic scoreboard" for the annual Jesuwon Community Church
   basketball tournament.
