@@ -8,29 +8,12 @@
   record the number of timeouts avaiable. There is a control window which is meant 
   to be seen only by the operator to run the scoreboard.  There is another
   window which is contains the scoreboard display. The scoreboard is deigned to run on
-  a dual monitor setup, where the operator contorls the scoreboard on one display
+  a dual monitor setup, where the operator contorls the scoreboard applet on one display
   and the scoreboard is displayed on another, larger display.
 <p>
 Included in this distribution is a file called "RUN.BAT" which is used to
 start the scoreboard on Wintel PCs.  If you don't know what you're doing,
 start there and you'll be able to figure it out.
-<p><h3>Copyright/LICENSE</h3>
-  This version of the scoreboard program draws from a scoreboard created by Bery Rinaldo.
-  Updates and modifications were made by Ryan Won.
-<p>
-This program is free software; you can redistribute it and/or
-modify it under the terms of the GNU General Public License
-as published by the Free Software Foundation; either version 2
-of the License, or (at your option) any later version.
-<p>
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-<p>
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 <p><h3>CONTROLS</h3>
 The control window has a variety of buttons and a few data entry fields which
 the operator can use to run the scoreboard.  The buttons and fields are
