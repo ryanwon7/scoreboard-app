@@ -1,48 +1,23 @@
 // ScoreBoard.java
 //
 // A scoreboard program designed to run as an applet for use with
-// the video system in the new Community Life Center to keep score
-// for basketball, volleyball and wrestling.
+// the a dual monitor setup. The program is used for the annual 
+// Jesuwon Community Church Basketball Tournament.
 //
 // Written by Bery Rinaldo on December 26, 1999
-// Updated and modified by Ryan Won on January 26, 2019
-// Version 1 - April 17, 2002
-// * Added GPL -- See gpl.txt and LICENSE.txt
-// * Updated SlideShow to work properly with Java 2 v1.3.1
-// Version 2 - April 20, 2002
-// * Changed screen layout for bigger fonts, separate possession arrow area
-//   includes change to size of slides to 640x190
-// Version 2.1 - April 23, 2002
-// * Changed possession indicator from "<" and ">" to circles like the bonus
-//   indicator for readability.
-// Version 2.2 - April 26, 2002
-// * Add Home+2 and Guest+2 buttons
-// * Add Clear Team Fouls button for end of half
-// * Add StartTO (timeout) ClearTO buttons with input field for length
-//   (secondary internal timer with buzz sound at end)
-// Version 3.0 - April 27, 2002
-// * Change screen layout from 640x480 to 800x600 to match configuration
-//   of PC in the CLC (SongBase wants it like this, so we'll match).
-// * Added volleyball mode.
-// Version 3.1 - May 2, 2002
-// * Fix screen updates for volleyball mode.
-// Version 3.2 - May 3, 2002
-// * Yet another fix screen updates for volleyball mode (this hack works ;-)
-// * Added buttonFontSize parameter, use Helvetica Bold font.  Increased
-//   default size of control window in ScoreBoard.txt
-// Version 3.3 - May 6, 2002
-// * Added announcements.txt capability to slide show
-// Version 3.4 - May 12, 2002
-// * Added undo last foul and re-init slide show (re-read announcements file)
-// Version 3.5 - January 6, 2009
-// * Added maxPeriods option in the ScoreBoard.txt and ScoreBoard.java to
-//   allow for 6 period games (Thanks for the suggestion, Roger).
+// Updated, redesigned, and modified by Ryan Won on January 26, 2019
 //
-// Version 4 - January 26, 2019
-// * Changed stuff
+// Version 2.2 - January 26, 2019
+// * Removed slideshow functionality
+// * Redesigned the scoreboard display
+// * Redesigned the scoreboard applet
+// * Implemented the following new functions:
+//   - Switch sides - Allows the switching of all information from 
+//     each side when teams change court at the half.
+//   - Paint Images - Drew images straight onto canvas (JCC, JBA logo)
+//   - Overtime Function
 //
-// Copyright (c) 1999-2009 Bery Rinaldo
-// Copyright (c) 2019 Ryan Won
+// Developed and Updated 2019, Ryan Won
 
 import java.util.*;
 import java.text.*;
@@ -54,8 +29,7 @@ import java.net.URL;
 public class ScoreBoard extends Applet implements Runnable, ActionListener {
     private Thread appletThread;
 
-    String tagString = "ScoreBoard Version 3.5 - January 6, 2009";
-    String copyString = "Copyright (C) 1999-2009 Bery Rinaldo";
+    String tagString = "ScoreBoard Version 2.2 - January 2019";
 
     Toolkit toolkit = Toolkit.getDefaultToolkit();
     URL hornSoundFile, beepSoundFile;
@@ -122,7 +96,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     public void init() {
 
 	System.out.println(tagString);
-	System.out.println(copyString);
 	System.out.println("");
 	System.out.println("ScoreBoard comes with ABSOLUTELY NO WARRANTY. ");
 	System.out.println("This is free software, and you are welcome");
@@ -132,8 +105,8 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     System.out.println("Used for noncommerical purposes for the Annual Jesuwon Basketball Tournament");
 
         getParamTags();
-        logoJBA = toolkit.getImage("JBA CALEBv2.png");
-        logoJesuwon = toolkit.getImage("jesuwon1.png");
+        logoJBA = toolkit.getImage("resources/JBA CALEB.png");
+        logoJesuwon = toolkit.getImage("resources/jesuwon.png");
         setupControlPanel();
         scoreboardImage = createImage(1920,1080);
         scoreboardGraphics = scoreboardImage.getGraphics();
@@ -429,7 +402,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 
     private void startSounds() {
         try {
-            hornSoundFile = new URL(getCodeBase(), "beep_long.wav");
+            hornSoundFile = new URL(getCodeBase(), "resources/beep_long.wav");
         } catch (java.net.MalformedURLException e) {
             System.err.println("can't form beep_long.wav URL");
         }
@@ -437,7 +410,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
             hornSound = getAudioClip(hornSoundFile);
         }
         try {
-            beepSoundFile = new URL(getCodeBase(), "beep.au");
+            beepSoundFile = new URL(getCodeBase(), "resources/beep.au");
         } catch (java.net.MalformedURLException e) {
             System.err.println("can't form beep.au URL");
         }
@@ -897,7 +870,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 
     public String getAppletInfo() {
         return tagString + "\n" +
-               copyString + "\n" +
                "A basketball scoreboard program";
     }
 
