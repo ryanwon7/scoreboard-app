@@ -96,7 +96,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
     public void init() {
 
 	System.out.println(tagString);
-	System.out.println(copyString);
 	System.out.println("");
 	System.out.println("ScoreBoard comes with ABSOLUTELY NO WARRANTY. ");
 	System.out.println("This is free software, and you are welcome");
@@ -871,7 +870,6 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
 
     public String getAppletInfo() {
         return tagString + "\n" +
-               copyString + "\n" +
                "A basketball scoreboard program";
     }
 
