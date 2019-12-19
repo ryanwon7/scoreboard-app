@@ -124,7 +124,7 @@ public class ScoreBoard extends Applet implements Runnable, ActionListener {
         timeoutTimer = new Timer(0);
         timeoutTimer.start();
         resetScoreboard();
-        windowFrame.show();
+        windowFrame.setVisible(true);
         startSounds();
         transferFocus();
     }
